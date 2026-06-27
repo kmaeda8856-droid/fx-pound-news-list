@@ -1,6 +1,10 @@
-import { newsList, type NewsItem } from '@/data/news'
+import { fetchNews, type NewsItem } from '@/lib/rss'
 
-function formatDateTime(iso: string): string {
+// 30分ごとにRSSを再取得
+export const revalidate = 1800
+
+function formatDateTime(dateStr: string): string {
+  if (!dateStr) return ''
   return new Intl.DateTimeFormat('ja-JP', {
     year: 'numeric',
     month: '2-digit',
@@ -8,44 +12,42 @@ function formatDateTime(iso: string): string {
     hour: '2-digit',
     minute: '2-digit',
     timeZone: 'Asia/Tokyo',
-  }).format(new Date(iso))
+  }).format(new Date(dateStr))
 }
 
-const sorted = [...newsList].sort(
-  (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-)
+export default async function Home() {
+  const news = await fetchNews()
 
-export default function Home() {
   return (
     <>
       <header>
         <h1>FX ポンド円 ニュースリスト</h1>
+        <span className="update-label">30分ごとに自動更新</span>
       </header>
 
       <div className="container">
         <div className="news-list">
-          {sorted.length === 0 ? (
+          {news.length === 0 ? (
             <div className="news-empty">
-              ニュースがまだありません。
+              ニュースを取得できませんでした。
               <br />
-              src/data/news.ts にニュースを追加してください。
+              しばらく待ってから再読み込みしてください。
             </div>
           ) : (
-            sorted.map((item: NewsItem) => (
-              <div key={item.id} className="news-item">
-                <span className="news-time">{formatDateTime(item.publishedAt)}</span>
-                <span className="news-title">{item.title}</span>
-                {item.content && <p className="news-content">{item.content}</p>}
-                {item.sourceUrl && (
-                  <a
-                    href={item.sourceUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="news-source"
-                  >
-                    {item.sourceUrl}
-                  </a>
-                )}
+            news.map((item: NewsItem, i) => (
+              <div key={i} className="news-item">
+                <div className="news-meta">
+                  <span className="news-time">{formatDateTime(item.pubDate)}</span>
+                  {item.source && <span className="news-source-tag">{item.source}</span>}
+                </div>
+                <a
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="news-title-link"
+                >
+                  {item.title}
+                </a>
               </div>
             ))
           )}
