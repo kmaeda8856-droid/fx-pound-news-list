@@ -1,7 +1,4 @@
-import Link from 'next/link'
-import { supabase, type NewsItem } from '@/lib/supabase'
-
-export const dynamic = 'force-dynamic'
+import { newsList, type NewsItem } from '@/data/news'
 
 function formatDateTime(iso: string): string {
   return new Intl.DateTimeFormat('ja-JP', {
@@ -14,50 +11,39 @@ function formatDateTime(iso: string): string {
   }).format(new Date(iso))
 }
 
-export default async function Home() {
-  const { data: news, error } = await supabase
-    .from('news_items')
-    .select('*')
-    .order('published_at', { ascending: false })
+const sorted = [...newsList].sort(
+  (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+)
 
+export default function Home() {
   return (
     <>
       <header>
         <h1>FX ポンド円 ニュースリスト</h1>
-        <Link href="/news/new" className="btn btn-primary">
-          + ニュースを追加
-        </Link>
       </header>
 
       <div className="container">
-        {error && (
-          <div className="error-banner" style={{ marginBottom: '16px' }}>
-            データの取得に失敗しました: {error.message}
-          </div>
-        )}
-
         <div className="news-list">
-          {!news || news.length === 0 ? (
+          {sorted.length === 0 ? (
             <div className="news-empty">
               ニュースがまだありません。
-              <br />「+ ニュースを追加」ボタンから追加してください。
+              <br />
+              src/data/news.ts にニュースを追加してください。
             </div>
           ) : (
-            news.map((item: NewsItem) => (
+            sorted.map((item: NewsItem) => (
               <div key={item.id} className="news-item">
-                <div className="news-meta">
-                  <span className="news-time">{formatDateTime(item.published_at)}</span>
-                </div>
+                <span className="news-time">{formatDateTime(item.publishedAt)}</span>
                 <span className="news-title">{item.title}</span>
                 {item.content && <p className="news-content">{item.content}</p>}
-                {item.source_url && (
+                {item.sourceUrl && (
                   <a
-                    href={item.source_url}
+                    href={item.sourceUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="news-source"
                   >
-                    {item.source_url}
+                    {item.sourceUrl}
                   </a>
                 )}
               </div>
