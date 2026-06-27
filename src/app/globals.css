@@ -1,0 +1,207 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+  background-color: #f5f5f5;
+  color: #1a1a1a;
+  font-size: 14px;
+}
+
+header {
+  background-color: #1a1a2e;
+  color: white;
+  padding: 14px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+header h1 {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.btn {
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-block;
+  transition: opacity 0.15s;
+}
+
+.btn:hover {
+  opacity: 0.85;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: #6200ea;
+  color: white;
+}
+
+.btn-secondary {
+  background-color: #555;
+  color: white;
+}
+
+.container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 20px 16px;
+}
+
+/* ニュース一覧 */
+.news-list {
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+}
+
+.news-empty {
+  padding: 48px 24px;
+  text-align: center;
+  color: #888;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.news-item {
+  padding: 14px 18px;
+  border-bottom: 1px solid #ebebeb;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.news-item:last-child {
+  border-bottom: none;
+}
+
+.news-item:hover {
+  background-color: #fafafa;
+}
+
+.news-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.news-time {
+  font-size: 11px;
+  color: #777;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.news-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1.45;
+}
+
+.news-content {
+  font-size: 12px;
+  color: #555;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.news-source {
+  font-size: 11px;
+  color: #6200ea;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.news-source:hover {
+  text-decoration: underline;
+}
+
+/* フォーム */
+.page-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #1a1a1a;
+}
+
+.form-card {
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  padding: 24px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 6px;
+  letter-spacing: 0.03em;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+  background: #fff;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: #6200ea;
+  box-shadow: 0 0 0 2px rgba(98, 0, 234, 0.08);
+}
+
+.form-group textarea {
+  min-height: 130px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.error-banner {
+  padding: 10px 14px;
+  background: #fff3f3;
+  border: 1px solid #ffcdd2;
+  border-radius: 4px;
+  color: #c62828;
+  font-size: 12px;
+  margin-bottom: 16px;
+}
