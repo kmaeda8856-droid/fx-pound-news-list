@@ -48,6 +48,7 @@ export default async function Home() {
                 >
                   {item.title}
                 </a>
+                {item.snippet && <p className="news-snippet">{item.snippet}</p>}
               </div>
             ))
           )}
