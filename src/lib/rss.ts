@@ -24,20 +24,31 @@ type RawItem = {
   link?: string
   pubDate?: string
   guid?: string | { '#text': string }
-  description?: string
 }
 
-function extractSnippet(html: string): string {
-  // Google ニュースの description は関連記事リスト（<ol><li>）なので除外
-  if (html.includes('<ol>') || html.includes('<li>')) return ''
-
-  return html
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/&nbsp;/g, '')
-    .replace(/&[a-z]+;/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 200)
+async function fetchOgDescription(url: string): Promise<string> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 4000)
+  try {
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      },
+    })
+    if (!res.ok) return ''
+    const html = await res.text()
+    // property と content の属性順が異なる場合も対応
+    const m =
+      html.match(/<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']*?)["']/i) ??
+      html.match(/<meta[^>]+content=["']([^"']*?)["'][^>]+property=["']og:description["']/i)
+    return m?.[1]?.trim() ?? ''
+  } catch {
+    return ''
+  } finally {
+    clearTimeout(timer)
+  }
 }
 
 export async function fetchNews(): Promise<NewsItem[]> {
@@ -48,22 +59,26 @@ export async function fetchNews(): Promise<NewsItem[]> {
   const data = parser.parse(xml)
   const items: RawItem[] = data?.rss?.channel?.item ?? []
 
-  return items
+  // パース → 降順ソート → 上位20件
+  const parsed = items
     .map((item) => {
-      // Google ニュースのタイトルは "記事タイトル - 媒体名" 形式
       const raw = item.title ?? ''
       const sepIdx = raw.lastIndexOf(' - ')
       const title = sepIdx !== -1 ? raw.slice(0, sepIdx) : raw
       const source = sepIdx !== -1 ? raw.slice(sepIdx + 3) : ''
-
-      // link が取れない場合は guid にフォールバック
       const link =
         item.link ??
         (typeof item.guid === 'string' ? item.guid : (item.guid?.['#text'] ?? ''))
-
-      const snippet = item.description ? extractSnippet(item.description) : ''
-
-      return { title, source, link, pubDate: item.pubDate ?? '', snippet }
+      return { title, source, link, pubDate: item.pubDate ?? '', snippet: '' }
     })
-    .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()) // 降順
+    .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime())
+    .slice(0, 20)
+
+  // 各記事の og:description を並列取得
+  const results = await Promise.allSettled(parsed.map((item) => fetchOgDescription(item.link)))
+
+  return parsed.map((item, i) => ({
+    ...item,
+    snippet: results[i].status === 'fulfilled' ? results[i].value : '',
+  }))
 }
