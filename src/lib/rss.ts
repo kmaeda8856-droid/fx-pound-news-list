@@ -28,11 +28,16 @@ type RawItem = {
 }
 
 function extractSnippet(html: string): string {
+  // Google ニュースの description は関連記事リスト（<ol><li>）なので除外
+  if (html.includes('<ol>') || html.includes('<li>')) return ''
+
   return html
-    .replace(/<[^>]*>/g, ' ')   // タグを除去
-    .replace(/\s+/g, ' ')        // 連続スペースを正規化
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/g, '')
+    .replace(/&[a-z]+;/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim()
-    .slice(0, 200)               // 最大200文字
+    .slice(0, 200)
 }
 
 export async function fetchNews(): Promise<NewsItem[]> {
